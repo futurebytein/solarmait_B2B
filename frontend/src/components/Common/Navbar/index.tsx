@@ -127,7 +127,8 @@ const Navbar = () => {
                     : "text-gray-700 hover:text-white hover:bg-blue-600"
                 }`}
               >
-                Solar Solutions For <FaChevronDown className="ml-2" size={14} />
+                Enquiry & Orders
+                <FaChevronDown className="ml-2" size={14} />
               </div>
               <ul className="absolute hidden group-hover:block bg-white shadow-lg rounded-md w-full z-50">
                 <li>
@@ -265,7 +266,7 @@ const Navbar = () => {
                         : "text-gray-700 hover:text-white hover:bg-blue-600"
                     }`}
                   >
-                    Solar Kits{" "}
+                    Solar Kits
                   </Link>
                 </li>
                 <li>
@@ -277,7 +278,7 @@ const Navbar = () => {
                         : "text-gray-700 hover:text-white hover:bg-blue-600"
                     }`}
                   >
-                    Solar Panels{" "}
+                    Solar Panels
                   </Link>
                 </li>
                 <li>
@@ -289,7 +290,7 @@ const Navbar = () => {
                         : "text-gray-700 hover:text-white hover:bg-blue-600"
                     }`}
                   >
-                    Solar Inverters{" "}
+                    Solar Inverters
                   </Link>
                 </li>
                 <li>
@@ -301,7 +302,7 @@ const Navbar = () => {
                         : "text-gray-700 hover:text-white hover:bg-blue-600"
                     }`}
                   >
-                    Solar Batteries{" "}
+                    Solar Batteries
                   </Link>
                 </li>
                 <li>
@@ -313,7 +314,7 @@ const Navbar = () => {
                         : "text-gray-700 hover:text-white hover:bg-blue-600"
                     }`}
                   >
-                    Solar Services{" "}
+                    Solar Services
                   </Link>
                 </li>
                 <li>
@@ -325,7 +326,7 @@ const Navbar = () => {
                         : "text-gray-700 hover:text-white hover:bg-blue-600"
                     }`}
                   >
-                    Other Products{" "}
+                    Other Products
                   </Link>
                 </li>
               </ul>
@@ -352,7 +353,7 @@ const Navbar = () => {
                         : "text-gray-700 hover:text-white hover:bg-blue-600"
                     }`}
                   >
-                    Know Solar{" "}
+                    Know Solar
                   </Link>
                 </li>
                 <li>
@@ -364,7 +365,7 @@ const Navbar = () => {
                         : "text-gray-700 hover:text-white hover:bg-blue-600"
                     }`}
                   >
-                    Learn Solar{" "}
+                    Learn Solar
                   </Link>
                 </li>
                 <li>
@@ -376,7 +377,7 @@ const Navbar = () => {
                         : "text-gray-700 hover:text-white hover:bg-blue-600"
                     }`}
                   >
-                    Downloads{" "}
+                    Downloads
                   </Link>
                 </li>
               </ul>
@@ -394,27 +395,52 @@ const Navbar = () => {
             </Link>
 
             {user ? (
-              <div
-                className="flex items-center gap-3 cursor-pointer hover:bg-gray-200 p-2 rounded"
-                onClick={() => router.push("/profile")}
-              >
-                <Avatar
-                  name={user.name}
-                  color="#6A0DAD"
-                  round={true}
-                  size="40"
-                  textSizeRatio={2}
-                />
-                <div>
-                  <p className="font-medium text-gray-900">
-                    {user.name.toUpperCase()}
-                  </p>
-                  <button
-                    onClick={handleLogout}
-                    className="text-sm text-red-600 hover:underline"
-                  >
-                    Logout
-                  </button>
+              <div className="flex items-center gap-3 p-2 rounded hover:bg-gray-200">
+                {/* Avatar & Name */}
+                <Link href="/profile" className="flex items-center gap-3">
+                  <Avatar
+                    name={user.name}
+                    color="#6A0DAD"
+                    round={true}
+                    size="40"
+                    textSizeRatio={2}
+                  />
+                </Link>
+
+                {/* Name & Buttons in two rows */}
+                <div className="flex flex-col">
+                  {/* User Name */}
+                  <Link href="/profile">
+                    <p className="font-medium text-gray-900">
+                      {user.name.toUpperCase()}
+                    </p>
+                  </Link>
+
+                  {/* Second row for Logout & Dashboard/Verification */}
+                  <div className="flex gap-2 mt-1">
+                    <button
+                      onClick={handleLogout}
+                      className="text-sm text-red-600 hover:underline"
+                    >
+                      Logout
+                    </button>
+
+                    {user.gst_verified ? (
+                      <button
+                        onClick={() => router.push("/admin")}
+                        className="bg-blue-500 text-white px-2 py-1 rounded text-sm"
+                      >
+                        Go to Dashboard
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => router.push("/profile")}
+                        className="bg-yellow-500 text-white px-2 py-1 rounded text-sm"
+                      >
+                        Get GST Verified
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             ) : (

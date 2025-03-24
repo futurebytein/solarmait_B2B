@@ -13,10 +13,11 @@ export default function Register(): JSX.Element {
   const [city, setCity] = useState("");
   const [pincode, setPincode] = useState("");
   const [password, setPassword] = useState("");
+  const [gst, setGst] = useState("");
   const router = useRouter();
 
   const handleRegister = async () => {
-    if (!firstName || !lastName || !email || !state || !city) {
+    if (!firstName || !lastName || !email || !state || !city || !gst) {
       alert("Please fill in all fields.");
       return;
     }
@@ -29,6 +30,7 @@ export default function Register(): JSX.Element {
       city,
       pincode,
       password,
+      gst,
     });
 
     //   {
@@ -41,10 +43,11 @@ export default function Register(): JSX.Element {
     const response = await apiHelper.post("/register", {
       name: firstName + " " + lastName,
       email,
-      role: "customer",
+      role: "vendor",
       state,
       city,
       password,
+      gstNumber: gst,
     });
     const token = response.data.token;
     if (!response.data.success) {
@@ -186,8 +189,27 @@ export default function Register(): JSX.Element {
                       placeholder="Enter your email address"
                     />
                   </div>
+
+                  {/* GST Number Input */}
+                  <div className="mb-6">
+                    <label
+                      htmlFor="gst"
+                      className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >
+                      GST Number
+                    </label>
+                    <input
+                      id="gst"
+                      type="text"
+                      value={gst}
+                      onChange={(e) => setGst(e.target.value)}
+                      className="w-full rounded-lg border border-gray-300 p-3 text-sm shadow-sm focus:border-yellow-500 focus:ring-yellow-500 dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
+                      placeholder="Enter your GST number"
+                    />
+                  </div>
+
                   {/* Pincode Input */}
-                  {/* <div className="mb-6">
+                  <div className="mb-6">
                     <label
                       htmlFor="pincode"
                       className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300"
@@ -202,10 +224,9 @@ export default function Register(): JSX.Element {
                       className="w-full rounded-lg border border-gray-300 p-3 text-sm shadow-sm focus:border-yellow-500 focus:ring-yellow-500 dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
                       placeholder="Enter your pincode"
                     />
-                  </div> */}
+                  </div>
 
-                  {/* password */}
-
+                  {/* Password Input */}
                   <div className="mb-6">
                     <label
                       htmlFor="password"

@@ -20,12 +20,15 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import RoomIcon from "@mui/icons-material/Room";
 import ContactPhoneIcon from "@mui/icons-material/ContactPhone";
 import ListAltIcon from "@mui/icons-material/ListAlt";
+
 interface User {
   name: string;
   email: string;
   role: string;
   state?: string;
   city?: string;
+  gst_number?: string;
+  gst_verified?: boolean;
   [key: string]: unknown; // Allow dynamic fields
 }
 
@@ -34,7 +37,7 @@ interface UpdatedValues {
 }
 
 const Profile = () => {
-  const { user } = useAuth() as { user: User | null }; // Type the user context
+  const { user } = useAuth() as { user: User | null };
   const [editField, setEditField] = useState<string | null>(null);
   const [updatedValues, setUpdatedValues] = useState<UpdatedValues>({});
 
@@ -73,6 +76,14 @@ const Profile = () => {
     field: keyof User,
     displayValue?: string
   ) => {
+    // If a custom displayValue is provided (e.g. "Yes"/"No"), use it;
+    // otherwise, use the user[field] if it's a string/number.
+    const currentValue =
+      displayValue ??
+      (typeof user[field] === "string" || typeof user[field] === "number"
+        ? (user[field] as string | number)
+        : "");
+
     return (
       <Box
         display="flex"
@@ -101,12 +112,7 @@ const Profile = () => {
           </Box>
         ) : (
           <Box display="flex" alignItems="center" gap={1}>
-            <Typography variant="body1">
-              {typeof user[field] === "string" ||
-              typeof user[field] === "number"
-                ? user[field]
-                : ""}
-            </Typography>
+            <Typography variant="body1">{currentValue}</Typography>
             <IconButton
               size="small"
               onClick={() => handleEdit(field as Extract<keyof User, string>)}
@@ -230,9 +236,16 @@ const Profile = () => {
               "role",
               user.role.charAt(0).toUpperCase() + user.role.slice(1)
             )}
-
             {user.state && renderField("State", "state")}
             {user.city && renderField("City", "city")}
+
+            {/* New Fields for GST */}
+            {user.gst_number && renderField("GST Number", "gst_number")}
+            {renderField(
+              "GST Verified",
+              "gst_verified",
+              user.gst_verified ? "Yes" : "No"
+            )}
           </CardContent>
         </Card>
       </Grid>
