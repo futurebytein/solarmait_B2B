@@ -22,8 +22,8 @@ const menuGroups = [
       },
       {
         icon: <ClipboardList className="w-6 h-6" />,
-        label: "User List",
-        route: "/admin/customerList",
+        label: "Vendors List",
+        route: "/admin/vendorList",
       },
       {
         icon: <ClipboardList className="w-6 h-6" />,
