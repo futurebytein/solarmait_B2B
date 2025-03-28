@@ -12,6 +12,10 @@ import {
   Typography,
   CircularProgress,
   Paper,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
 import { Delete as DeleteIcon } from "@mui/icons-material";
 import { axiosInstance } from "@/lib/axiosInstance";
@@ -32,6 +36,7 @@ const AddSolarKit: React.FC<AddSolarKitProps> = ({
 }) => {
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
+  const [kitCategory, setKitCategory] = useState<string>(""); // New category field
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [searchResults, setSearchResults] = useState<Product[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
@@ -79,9 +84,14 @@ const AddSolarKit: React.FC<AddSolarKitProps> = ({
   // Submit the form
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !description.trim() || selectedProducts.length === 0) {
+    if (
+      !name.trim() ||
+      !description.trim() ||
+      !kitCategory.trim() ||
+      selectedProducts.length === 0
+    ) {
       setError(
-        "Please provide a name, description, and select at least one product."
+        "Please provide a kit name, description, category, and select at least one product."
       );
       return;
     }
@@ -91,6 +101,7 @@ const AddSolarKit: React.FC<AddSolarKitProps> = ({
     const payload = {
       name: name.trim(),
       description: description.trim(),
+      category: kitCategory, // include category in payload
       products: selectedProducts.map((p) => p._id),
     };
 
@@ -133,6 +144,21 @@ const AddSolarKit: React.FC<AddSolarKitProps> = ({
         value={description}
         onChange={(e) => setDescription(e.target.value)}
       />
+
+      {/* New Category Field */}
+      <FormControl fullWidth margin="normal">
+        <InputLabel id="solar-kit-category-label">Category</InputLabel>
+        <Select
+          labelId="solar-kit-category-label"
+          label="Category"
+          value={kitCategory}
+          onChange={(e) => setKitCategory(e.target.value)}
+        >
+          <MenuItem value="OnGrid">OnGrid</MenuItem>
+          <MenuItem value="OffGrid">OffGrid</MenuItem>
+          <MenuItem value="Hybrid">Hybrid</MenuItem>
+        </Select>
+      </FormControl>
 
       {/* Search Field */}
       <TextField

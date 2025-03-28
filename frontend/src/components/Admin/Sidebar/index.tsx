@@ -40,6 +40,16 @@ const menuGroups = [
         label: "Coupon Manager",
         route: "/admin/couponManager",
       },
+      {
+        icon: <ClipboardList className="w-6 h-6" />,
+        label: "Payout",
+        route: "/admin/payout",
+      },
+      {
+        icon: <ClipboardList className="w-6 h-6" />,
+        label: "Wallet",
+        route: "/admin/wallet",
+      },
     ],
   },
 ];

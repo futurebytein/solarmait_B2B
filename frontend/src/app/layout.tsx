@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "SolarMait B2B ",
+  title: "SOLAR-MAIT B2B ",
   description: "",
 };
 import { AuthProvider } from "@/contexts/AuthContext";

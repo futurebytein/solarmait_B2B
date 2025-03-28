@@ -29,6 +29,7 @@ interface SolarKit {
   description: string;
   products: string[];
   technical_docs: string[]; // <-- new field
+  category: string;
 }
 
 interface SolarKitsResponse {
@@ -113,6 +114,9 @@ const SolarKitsTable = () => {
                       <strong>Number of Products</strong>
                     </TableCell>
                     <TableCell>
+                      <strong>Category</strong>
+                    </TableCell>
+                    <TableCell>
                       <strong>Actions</strong>
                     </TableCell>
                   </TableRow>
@@ -124,6 +128,7 @@ const SolarKitsTable = () => {
                         <TableCell>{kit.name}</TableCell>
                         <TableCell>{kit.description}</TableCell>
                         <TableCell>{kit.products?.length || 0}</TableCell>
+                        <TableCell>{kit?.category || 0}</TableCell>
                         <TableCell>
                           <IconButton
                             color="primary"

@@ -44,7 +44,7 @@ export default function Login(): JSX.Element {
                     alt="logo"
                   />
                   <h4 className="mb-12 mt-4 text-xl font-semibold">
-                    We are The SolarMait Team
+                    We are The SOLAR-MAIT Team
                   </h4>
                 </div>
 

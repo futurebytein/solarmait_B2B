@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Avatar from "react-avatar";
 import Link from "next/link";
 import {
@@ -10,7 +10,7 @@ import {
   FaYoutube,
   FaChevronDown,
 } from "react-icons/fa";
-import { useRouter, usePathname } from "next/navigation"; // Updated for active route
+import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import Badge from "@mui/material/Badge";
@@ -19,27 +19,52 @@ import Image from "next/image";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const { user, logout } = useAuth();
   const router = useRouter();
-  const pathname = usePathname(); // Get current path
+  const pathname = usePathname();
+  const dropdownRef = useRef(null);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
 
-  const handleLogout = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleLogout = (e) => {
     e.stopPropagation();
     logout();
+    setDropdownOpen(false);
   };
 
   const cartCount = user?.cart?.length || 0;
 
-  const isActive = (path: string): boolean => pathname === path;
+  const isActive = (path) => pathname === path;
+
+  // Close user dropdown if clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleDashboard = () => {
+    if (user.gst_verified) {
+      router.push("/admin");
+    } else {
+      router.push("/profile");
+    }
+    setDropdownOpen(false);
+  };
 
   return (
-    <header className="bg-white shadow-sm">
+    <header className="bg-white shadow-md">
       <nav className="bg-gray-100 py-4">
         <div className="container mx-auto flex justify-between items-center px-4">
+          {/* Logo */}
           <Link href="/" className="flex items-center gap-2 mr-6">
             <Image
               src="/assets/images/solarmait-logo.webp"
@@ -50,6 +75,7 @@ const Navbar = () => {
             <h1 className="text-xl font-bold hidden lg:block">SOLAR-MAIT</h1>
           </Link>
 
+          {/* Mobile menu toggle */}
           <div className="md:hidden">
             <button onClick={toggleMenu}>
               {isOpen ? (
@@ -60,330 +86,51 @@ const Navbar = () => {
             </button>
           </div>
 
+          {/* Navigation links */}
           <ul
             className={`absolute md:static top-16 left-0 w-full md:w-auto bg-gray-100 md:bg-transparent md:flex flex-col md:flex-row items-start md:items-center p-4 md:p-0 space-y-2 md:space-y-0 md:space-x-4 z-50 transition-all duration-300 ${
               isOpen ? "block" : "hidden"
             }`}
           >
-            {/* home menu */}
             <li className="relative group w-full md:w-auto">
               <Link
                 href="/"
-                className={`inline-flex items-center px-2 py-1 rounded-md transition-colors duration-300 ${
+                className={`inline-flex items-center px-3 py-1 rounded-md transition-colors duration-300 ${
                   isActive("/")
                     ? "bg-blue-600 text-white"
                     : "text-gray-700 hover:text-white hover:bg-blue-600"
                 }`}
               >
-                Home <FaChevronDown className="ml-2" size={14} />
+                Home
               </Link>
-              <ul className="absolute hidden group-hover:block bg-white shadow-lg rounded-md w-full z-50">
-                <li>
-                  <Link
-                    href="/about-us"
-                    className={`block px-4 py-2 rounded-md ${
-                      isActive("/about-us")
-                        ? "bg-blue-600 text-white"
-                        : "text-gray-700 hover:text-white hover:bg-blue-600"
-                    }`}
-                  >
-                    About Us
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/career"
-                    className={`block px-4 py-2 rounded-md ${
-                      isActive("/career")
-                        ? "bg-blue-600 text-white"
-                        : "text-gray-700 hover:text-white hover:bg-blue-600"
-                    }`}
-                  >
-                    Career
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/contact-us"
-                    className={`block px-4 py-2 rounded-md ${
-                      isActive("/contact-us")
-                        ? "bg-blue-600 text-white"
-                        : "text-gray-700 hover:text-white hover:bg-blue-600"
-                    }`}
-                  >
-                    Contact Us
-                  </Link>
-                </li>
-              </ul>
             </li>
-            {/* solar solution menu */}
             <li className="relative group w-full md:w-auto">
-              <div
-                className={`inline-flex items-center px-2 py-1 rounded-md transition-colors duration-300 ${
-                  isActive("/For-residential-homes") ||
-                  isActive("/For-housing-societies") ||
-                  isActive("/For-commercial")
+              <Link
+                href="/enquiries"
+                className={`inline-flex items-center px-3 py-1 rounded-md transition-colors duration-300 ${
+                  isActive("/enquiries")
                     ? "bg-blue-600 text-white"
                     : "text-gray-700 hover:text-white hover:bg-blue-600"
                 }`}
               >
                 Enquiry & Orders
-                <FaChevronDown className="ml-2" size={14} />
-              </div>
-              <ul className="absolute hidden group-hover:block bg-white shadow-lg rounded-md w-full z-50">
-                <li>
-                  <Link
-                    href="/For-residential-homes"
-                    className={`block px-4 py-2 rounded-md ${
-                      isActive("/For-residential-homes")
-                        ? "bg-blue-600 text-white"
-                        : "text-gray-700 hover:text-white hover:bg-blue-600"
-                    }`}
-                  >
-                    Residential Homes
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/For-housing-societies"
-                    className={`block px-4 py-2 rounded-md ${
-                      isActive("/For-housing-societies")
-                        ? "bg-blue-600 text-white"
-                        : "text-gray-700 hover:text-white hover:bg-blue-600"
-                    }`}
-                  >
-                    Housing Societies
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/For-commercial"
-                    className={`block px-4 py-2 rounded-md ${
-                      isActive("/For-commercial")
-                        ? "bg-blue-600 text-white"
-                        : "text-gray-700 hover:text-white hover:bg-blue-600"
-                    }`}
-                  >
-                    Commercial and Business
-                  </Link>
-                </li>
-              </ul>
+              </Link>
             </li>
-            {/* partners Menu */}
             <li className="relative group w-full md:w-auto">
               <Link
-                href="/partners"
-                className={`inline-flex items-center px-2 py-1 rounded-md transition-colors duration-300 ${
-                  isActive("/partners")
+                href="/contactUs"
+                className={`inline-flex items-center px-3 py-1 rounded-md transition-colors duration-300 ${
+                  isActive("/contactUs")
                     ? "bg-blue-600 text-white"
                     : "text-gray-700 hover:text-white hover:bg-blue-600"
                 }`}
               >
-                Become Partners <FaChevronDown className="ml-2" size={14} />
+                Contact Us
               </Link>
-              <ul className="absolute hidden group-hover:block bg-white shadow-lg rounded-md w-full z-50">
-                <li>
-                  <Link
-                    href="/about-us"
-                    className={`block px-4 py-2 rounded-md ${
-                      isActive("/about-us")
-                        ? "bg-blue-600 text-white"
-                        : "text-gray-700 hover:text-white hover:bg-blue-600"
-                    }`}
-                  >
-                    Influence Partner
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/career"
-                    className={`block px-4 py-2 rounded-md ${
-                      isActive("/career")
-                        ? "bg-blue-600 text-white"
-                        : "text-gray-700 hover:text-white hover:bg-blue-600"
-                    }`}
-                  >
-                    Store Partner
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/contact-us"
-                    className={`block px-4 py-2 rounded-md ${
-                      isActive("/contact-us")
-                        ? "bg-blue-600 text-white"
-                        : "text-gray-700 hover:text-white hover:bg-blue-600"
-                    }`}
-                  >
-                    Advisory Partner
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/contact-us"
-                    className={`block px-4 py-2 rounded-md ${
-                      isActive("/contact-us")
-                        ? "bg-blue-600 text-white"
-                        : "text-gray-700 hover:text-white hover:bg-blue-600"
-                    }`}
-                  >
-                    Installation Partner
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/contact-us"
-                    className={`block px-4 py-2 rounded-md ${
-                      isActive("/contact-us")
-                        ? "bg-blue-600 text-white"
-                        : "text-gray-700 hover:text-white hover:bg-blue-600"
-                    }`}
-                  >
-                    Franchisee Partner
-                  </Link>
-                </li>
-              </ul>
-            </li>
-            {/* products and services menu */}
-            <li className="relative group w-full md:w-auto">
-              <Link
-                href="/products"
-                className={`inline-flex items-center px-2 py-1 rounded-md transition-colors duration-300 ${
-                  isActive("/products")
-                    ? "bg-blue-600 text-white"
-                    : "text-gray-700 hover:text-white hover:bg-blue-600"
-                }`}
-              >
-                Products & Services <FaChevronDown className="ml-2" size={14} />
-              </Link>
-              <ul className="absolute hidden group-hover:block bg-white shadow-lg rounded-md w-full z-50">
-                <li>
-                  <Link
-                    href="/products?category=solar_components"
-                    className={`block px-4 py-2 rounded-md ${
-                      isActive("/products?category=solar_components")
-                        ? "bg-blue-600 text-white"
-                        : "text-gray-700 hover:text-white hover:bg-blue-600"
-                    }`}
-                  >
-                    Solar Kits
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/products?category=pannel"
-                    className={`block px-4 py-2 rounded-md ${
-                      isActive("/products?category=pannel")
-                        ? "bg-blue-600 text-white"
-                        : "text-gray-700 hover:text-white hover:bg-blue-600"
-                    }`}
-                  >
-                    Solar Panels
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/products?category=inverter"
-                    className={`block px-4 py-2 rounded-md ${
-                      isActive("/products?category=inverter")
-                        ? "bg-blue-600 text-white"
-                        : "text-gray-700 hover:text-white hover:bg-blue-600"
-                    }`}
-                  >
-                    Solar Inverters
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/products?category=battery"
-                    className={`block px-4 py-2 rounded-md ${
-                      isActive("/products?category=battery")
-                        ? "bg-blue-600 text-white"
-                        : "text-gray-700 hover:text-white hover:bg-blue-600"
-                    }`}
-                  >
-                    Solar Batteries
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/products?category=services"
-                    className={`block px-4 py-2 rounded-md ${
-                      isActive("/products?category=services")
-                        ? "bg-blue-600 text-white"
-                        : "text-gray-700 hover:text-white hover:bg-blue-600"
-                    }`}
-                  >
-                    Solar Services
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/contact-us"
-                    className={`block px-4 py-2 rounded-md ${
-                      isActive("/contact-us")
-                        ? "bg-blue-600 text-white"
-                        : "text-gray-700 hover:text-white hover:bg-blue-600"
-                    }`}
-                  >
-                    Other Products
-                  </Link>
-                </li>
-              </ul>
-            </li>
-            {/* blogs menu */}
-            <li className="relative group w-full md:w-auto">
-              <Link
-                href="/blogs"
-                className={`inline-flex items-center px-2 py-1 rounded-md transition-colors duration-300 ${
-                  isActive("/blogs")
-                    ? "bg-blue-600 text-white"
-                    : "text-gray-700 hover:text-white hover:bg-blue-600"
-                }`}
-              >
-                News & Blogs <FaChevronDown className="ml-2" size={14} />
-              </Link>
-              <ul className="absolute hidden group-hover:block bg-white shadow-lg rounded-md w-full z-50">
-                <li>
-                  <Link
-                    href="/blogs"
-                    className={`block px-4 py-2 rounded-md ${
-                      isActive("/blogs")
-                        ? "bg-blue-600 text-white"
-                        : "text-gray-700 hover:text-white hover:bg-blue-600"
-                    }`}
-                  >
-                    Know Solar
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/For-housing-societies"
-                    className={`block px-4 py-2 rounded-md ${
-                      isActive("/For-housing-societies")
-                        ? "bg-blue-600 text-white"
-                        : "text-gray-700 hover:text-white hover:bg-blue-600"
-                    }`}
-                  >
-                    Learn Solar
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/For-commercial"
-                    className={`block px-4 py-2 rounded-md ${
-                      isActive("/For-commercial")
-                        ? "bg-blue-600 text-white"
-                        : "text-gray-700 hover:text-white hover:bg-blue-600"
-                    }`}
-                  >
-                    Downloads
-                  </Link>
-                </li>
-              </ul>
             </li>
           </ul>
 
+          {/* Right side icons */}
           <div className="flex items-center gap-6">
             <Link href={`${user ? "/cart" : "/login"}`}>
               <Badge badgeContent={cartCount} color="primary" showZero={false}>
@@ -395,9 +142,11 @@ const Navbar = () => {
             </Link>
 
             {user ? (
-              <div className="flex items-center gap-3 p-2 rounded hover:bg-gray-200">
-                {/* Avatar & Name */}
-                <Link href="/profile" className="flex items-center gap-3">
+              <div ref={dropdownRef} className="relative">
+                <button
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="flex items-center gap-2 p-2 rounded hover:bg-gray-200 focus:outline-none"
+                >
                   <Avatar
                     name={user.name}
                     color="#6A0DAD"
@@ -405,43 +154,30 @@ const Navbar = () => {
                     size="40"
                     textSizeRatio={2}
                   />
-                </Link>
+                  <span className="hidden md:block font-medium text-gray-900">
+                    {user.name.toUpperCase()}
+                  </span>
+                  <FaChevronDown className="text-gray-600" />
+                </button>
 
-                {/* Name & Buttons in two rows */}
-                <div className="flex flex-col">
-                  {/* User Name */}
-                  <Link href="/profile">
-                    <p className="font-medium text-gray-900">
-                      {user.name.toUpperCase()}
-                    </p>
-                  </Link>
-
-                  {/* Second row for Logout & Dashboard/Verification */}
-                  <div className="flex gap-2 mt-1">
+                {dropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded shadow-md z-[20000]">
+                    <button
+                      onClick={handleDashboard}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      {user.gst_verified
+                        ? "Go to Dashboard"
+                        : "Get GST Verified"}
+                    </button>
                     <button
                       onClick={handleLogout}
-                      className="text-sm text-red-600 hover:underline"
+                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
                     >
                       Logout
                     </button>
-
-                    {user.gst_verified ? (
-                      <button
-                        onClick={() => router.push("/admin")}
-                        className="bg-blue-500 text-white px-2 py-1 rounded text-sm"
-                      >
-                        Go to Dashboard
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => router.push("/profile")}
-                        className="bg-yellow-500 text-white px-2 py-1 rounded text-sm"
-                      >
-                        Get GST Verified
-                      </button>
-                    )}
                   </div>
-                </div>
+                )}
               </div>
             ) : (
               <Link href="/login">

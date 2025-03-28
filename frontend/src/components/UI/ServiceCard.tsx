@@ -99,7 +99,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
         key: "rzp_test_i5CHDnzV5RiUZp", // Replace with actual Razorpay Key
         amount: razorpay_order.amount_due.toString(),
         currency: "INR",
-        name: "SolarMait Service",
+        name: "SOLAR-MAIT Service",
         description: service.name,
         order_id: razorpay_order.id, // Use order_id from backend
         handler: async function (response: RazorpayPaymentResponse) {

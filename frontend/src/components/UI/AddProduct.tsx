@@ -24,6 +24,13 @@ interface NewProduct {
   coverImage: File | null;
   productImages: File[];
   technicalDocs: File[];
+  shippingChargesPerKm: string;
+  wareHousePincode: string;
+  specifications: Record<string, string>;
+  hsnCode: string;
+  product_code: string;
+  discount: string;
+  gstPerc: string;
 }
 
 interface AddProductProps {
@@ -44,10 +51,21 @@ const AddProduct: React.FC<AddProductProps> = ({ onProductAdded }) => {
     tags: "",
     coverImage: null,
     productImages: [],
-    technicalDocs: [], // New Field for PDFs
+    technicalDocs: [],
+    shippingChargesPerKm: "",
+    wareHousePincode: "",
+    specifications: {},
+    hsnCode: "",
+    product_code: "",
+    discount: "",
+    gstPerc: "",
   });
 
-  // Handle input changes
+  // States to handle new specification key/value input
+  const [specKey, setSpecKey] = useState("");
+  const [specValue, setSpecValue] = useState("");
+
+  // Handle input changes for text fields
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -84,6 +102,29 @@ const AddProduct: React.FC<AddProductProps> = ({ onProductAdded }) => {
     }
   };
 
+  // Add new specification to the specifications object
+  const addSpecification = () => {
+    if (specKey.trim() && specValue.trim()) {
+      setNewProduct((prevProduct) => ({
+        ...prevProduct,
+        specifications: {
+          ...prevProduct.specifications,
+          [specKey]: specValue,
+        },
+      }));
+      setSpecKey("");
+      setSpecValue("");
+    }
+  };
+
+  // Optionally, remove a specification from the object
+  const removeSpecification = (keyToRemove: string) => {
+    setNewProduct((prevProduct) => {
+      const { [keyToRemove]: _, ...restSpecs } = prevProduct.specifications;
+      return { ...prevProduct, specifications: restSpecs };
+    });
+  };
+
   // Handle form submission
   const handleSubmit = async () => {
     try {
@@ -95,6 +136,17 @@ const AddProduct: React.FC<AddProductProps> = ({ onProductAdded }) => {
       formData.append("brand", newProduct.brand);
       formData.append("stock", newProduct.stock);
       formData.append("tags", newProduct.tags);
+      formData.append("shippingChargesPerKm", newProduct.shippingChargesPerKm);
+      formData.append("wareHousePincode", newProduct.wareHousePincode);
+      formData.append("hsnCode", newProduct.hsnCode);
+      formData.append("product_code", newProduct.product_code);
+      formData.append("discount", newProduct.discount);
+      formData.append("gstPerc", newProduct.gstPerc);
+      // Append specifications as JSON string
+      formData.append(
+        "specifications",
+        JSON.stringify(newProduct.specifications)
+      );
 
       if (newProduct.coverImage) {
         formData.append("cover_image", newProduct.coverImage);
@@ -104,7 +156,6 @@ const AddProduct: React.FC<AddProductProps> = ({ onProductAdded }) => {
         formData.append("product_images", file);
       });
 
-      // Append technical docs
       newProduct.technicalDocs.forEach((file) => {
         formData.append("technical_docs", file);
       });
@@ -127,6 +178,7 @@ const AddProduct: React.FC<AddProductProps> = ({ onProductAdded }) => {
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
     setOpen(false);
+    // Reset new product state
     setNewProduct({
       name: "",
       description: "",
@@ -137,8 +189,17 @@ const AddProduct: React.FC<AddProductProps> = ({ onProductAdded }) => {
       tags: "",
       coverImage: null,
       productImages: [],
-      technicalDocs: [], // Reset technical docs on close
+      technicalDocs: [],
+      shippingChargesPerKm: "",
+      wareHousePincode: "",
+      specifications: {},
+      hsnCode: "",
+      product_code: "",
+      discount: "",
+      gstPerc: "",
     });
+    setSpecKey("");
+    setSpecValue("");
   };
 
   return (
@@ -155,6 +216,7 @@ const AddProduct: React.FC<AddProductProps> = ({ onProductAdded }) => {
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>Add New Product</DialogTitle>
         <DialogContent>
+          {/* Basic product fields */}
           <TextField
             margin="dense"
             label="Name"
@@ -231,6 +293,97 @@ const AddProduct: React.FC<AddProductProps> = ({ onProductAdded }) => {
             onChange={handleChange}
           />
 
+          {/* New fields */}
+          <TextField
+            margin="dense"
+            label="Shipping Charges Per Km"
+            name="shippingChargesPerKm"
+            type="number"
+            inputProps={{ min: 0 }}
+            fullWidth
+            value={newProduct.shippingChargesPerKm}
+            onChange={handleChange}
+          />
+          <TextField
+            margin="dense"
+            label="Warehouse Pincode"
+            name="wareHousePincode"
+            fullWidth
+            value={newProduct.wareHousePincode}
+            onChange={handleChange}
+          />
+          <TextField
+            margin="dense"
+            label="HSN Code"
+            name="hsnCode"
+            fullWidth
+            value={newProduct.hsnCode}
+            onChange={handleChange}
+          />
+          <TextField
+            margin="dense"
+            label="Product Code"
+            name="product_code"
+            fullWidth
+            value={newProduct.product_code}
+            onChange={handleChange}
+          />
+          <TextField
+            margin="dense"
+            label="Discount"
+            name="discount"
+            type="number"
+            fullWidth
+            value={newProduct.discount}
+            onChange={handleChange}
+          />
+          <TextField
+            margin="dense"
+            label="GST Percentage"
+            name="gstPerc"
+            type="number"
+            fullWidth
+            value={newProduct.gstPerc}
+            onChange={handleChange}
+          />
+
+          {/* Specifications: dynamic key-value inputs */}
+          <Typography style={{ marginTop: "1rem" }}>Specifications:</Typography>
+          <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
+            <TextField
+              label="Key"
+              value={specKey}
+              onChange={(e) => setSpecKey(e.target.value)}
+            />
+            <TextField
+              label="Value"
+              value={specValue}
+              onChange={(e) => setSpecValue(e.target.value)}
+            />
+            <Button variant="outlined" onClick={addSpecification}>
+              Add
+            </Button>
+          </div>
+          {/* Display added specifications */}
+          {Object.keys(newProduct.specifications).length > 0 && (
+            <div style={{ marginTop: "0.5rem" }}>
+              {Object.entries(newProduct.specifications).map(([key, value]) => (
+                <div
+                  key={key}
+                  style={{ display: "flex", alignItems: "center" }}
+                >
+                  <Typography>
+                    {key}: {value}
+                  </Typography>
+                  <Button size="small" onClick={() => removeSpecification(key)}>
+                    Remove
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* File inputs */}
           <Typography style={{ marginTop: "1rem" }}>Cover Image:</Typography>
           <input
             type="file"

@@ -13,6 +13,7 @@ import {
   CircularProgress,
   Typography,
   Box,
+  Button,
 } from "@mui/material";
 import { axiosInstance } from "@/lib/axiosInstance";
 
@@ -78,6 +79,24 @@ const VendorsList: React.FC = () => {
     fetchVendors(page, limit);
   }, [page, limit]);
 
+  // Handler for GST verification
+  const handleVerifyGST = async (vendorId: string) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to mark GST as verified for this vendor?"
+    );
+    if (!confirmed) return;
+
+    try {
+      // Calling the verification endpoint (using PATCH here, adjust method if needed)
+      await axiosInstance.put(`/users/vendors/verify-gst/${vendorId}`);
+      // Refetch the vendor list to update the status
+      fetchVendors(page, limit);
+    } catch (err: any) {
+      console.error("Error verifying GST:", err);
+      alert(err.message || "An error occurred while verifying GST.");
+    }
+  };
+
   // Handlers for TablePagination
   const handleChangePage = (
     event: React.MouseEvent<HTMLButtonElement> | null,
@@ -142,6 +161,9 @@ const VendorsList: React.FC = () => {
                 <TableCell>
                   <strong>GST Verified</strong>
                 </TableCell>
+                <TableCell>
+                  <strong>GST Action</strong>
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -155,11 +177,22 @@ const VendorsList: React.FC = () => {
                     <TableCell>{vendor.is_verified ? "Yes" : "No"}</TableCell>
                     <TableCell>{vendor.gst_number || "N/A"}</TableCell>
                     <TableCell>{vendor.gst_verified ? "Yes" : "No"}</TableCell>
+                    <TableCell>
+                      {!vendor.gst_verified && (
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={() => handleVerifyGST(vendor._id)}
+                        >
+                          Verify
+                        </Button>
+                      )}
+                    </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={7} align="center">
+                  <TableCell colSpan={8} align="center">
                     No vendors found.
                   </TableCell>
                 </TableRow>

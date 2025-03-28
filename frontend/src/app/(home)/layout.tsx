@@ -12,7 +12,7 @@ export default function RootLayout({
     <>
       <Navbar />
       {children}
-      <StickyButton />
+      {/* <StickyButton /> */}
 
       <Footer />
     </>

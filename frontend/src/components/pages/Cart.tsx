@@ -229,7 +229,7 @@ const Cart = () => {
         key: "rzp_test_i5CHDnzV5RiUZp",
         amount: razorpay_order.amount.toString(),
         currency: razorpay_order.currency || "INR",
-        name: "SolarMait Order",
+        name: "SOLAR-MAIT Order",
         description: "Complete your payment",
         order_id: razorpay_order.id,
         handler: async (response: RazorpayPaymentResponse) => {

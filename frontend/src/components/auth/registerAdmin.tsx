@@ -1,9 +1,8 @@
 "use client";
 import Image from "next/image";
 import React, { useState } from "react";
-import apiHelper from '../../helpers/apiHelper'
+import apiHelper from "../../helpers/apiHelper";
 import { useRouter } from "next/navigation";
-
 
 export default function Register(): JSX.Element {
   const [firstName, setFirstName] = useState("");
@@ -15,9 +14,8 @@ export default function Register(): JSX.Element {
   const [password, setPassword] = useState("");
   const router = useRouter();
 
-
-  const handleRegister = async() => {
-    if (!firstName || !lastName || !email || !state || !city ) {
+  const handleRegister = async () => {
+    if (!firstName || !lastName || !email || !state || !city) {
       alert("Please fill in all fields.");
       return;
     }
@@ -29,27 +27,26 @@ export default function Register(): JSX.Element {
       state,
       city,
       pincode,
-      password
+      password,
     });
 
-    const response = await apiHelper.post('/register',{
-      name: firstName+" "+lastName,
+    const response = await apiHelper.post("/register", {
+      name: firstName + " " + lastName,
       email,
-      role:'admin',
+      role: "admin",
       state,
       city,
-      password
+      password,
     });
     const token = response.data.token;
-    if(!response.data.success){
-      alert(response.data.message)
-    }
-    else{
+    if (!response.data.success) {
+      alert(response.data.message);
+    } else {
       localStorage.setItem("token", token);
-      router.push('/')
+      router.push("/");
     }
 
-    console.log({response});
+    console.log({ response });
 
     alert(`Welcome, ${firstName} ${lastName}! Your account has been created.`);
   };
@@ -72,7 +69,7 @@ export default function Register(): JSX.Element {
                     alt="logo"
                   />
                   <h4 className="mb-12 mt-4 text-xl font-semibold">
-                    Join the SolarMait Team
+                    Join the SOLAR-MAIT Team
                   </h4>
                 </div>
 
@@ -243,7 +240,7 @@ export default function Register(): JSX.Element {
                     Become a part of our mission
                   </h4>
                   <p className="text-lg lg:text-2xl font-medium">
-                    By joining SolarMait, you are contributing to a sustainable
+                    By joining SOLAR-MAIT, you are contributing to a sustainable
                     future. Sign up now and take your first step towards making
                     an impact!
                   </p>
