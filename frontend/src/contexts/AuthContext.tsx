@@ -73,7 +73,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (email: string, password: string) => {
     setLoading(true);
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_APP_API_URL}/v1/login`,
+      `${process.env.NEXT_PUBLIC_APP_API_URL}/login`,
       {
         method: "POST",
         headers: {
