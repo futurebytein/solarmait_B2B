@@ -6,21 +6,23 @@ import Cookies from "js-cookie";
 import apiHelper from "../../helpers/apiHelper";
 
 export default function Register(): JSX.Element {
-  // Mandatory Fields
+  // Renamed / required fields
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  // Store selected state isoCode (for API calls)
-  const [stateIso, setStateIso] = useState("");
-  // Store city name directly
-  const [city, setCity] = useState("");
-  const [companyName, setCompanyName] = useState("");
-  const [companyGstNumber, setCompanyGstNumber] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [stateValue, setStateValue] = useState(""); // user-chosen state name
+  const [city, setCity] = useState("");
+  const [gstNumber, setGstNumber] = useState("");
+  const [companyName, setCompanyName] = useState("");
 
-  // Dropdown lists
-  const [states, setStates] = useState<any[]>([]);
-  const [cities, setCities] = useState<any[]>([]);
+  // Internal usage for location
+  const [allStates, setAllStates] = useState<any[]>([]);
+  const [allCities, setAllCities] = useState<any[]>([]);
+  const [selectedStateIso, setSelectedStateIso] = useState("");
+
+  // Error messages
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const router = useRouter();
 
@@ -30,7 +32,7 @@ export default function Register(): JSX.Element {
       try {
         const response = await apiHelper.get("/location/states/IN", true);
         // Assuming the API returns an array of state objects in response.data
-        setStates(response.data);
+        setAllStates(response.data);
       } catch (error) {
         console.error("Error fetching states:", error);
       }
@@ -38,58 +40,59 @@ export default function Register(): JSX.Element {
     fetchStates();
   }, []);
 
-  // Fetch list of cities for the selected state using the isoCode
+  // Fetch list of cities for the selected state isoCode
   useEffect(() => {
-    if (!stateIso) return;
+    if (!selectedStateIso) return;
     const fetchCities = async () => {
       try {
         const response = await apiHelper.get(
-          `/location/cities/IN/${stateIso}`,
+          `/location/cities/IN/${selectedStateIso}`,
           true
         );
         // Assuming the API returns an array of city objects in response.data
-        setCities(response.data);
+        setAllCities(response.data);
       } catch (error) {
         console.error("Error fetching cities:", error);
       }
     };
     fetchCities();
-  }, [stateIso]);
+  }, [selectedStateIso]);
+
+  const validateFields = () => {
+    const newErrors: { [key: string]: string } = {};
+
+    if (!name) newErrors.name = "Name is required.";
+    if (!email) newErrors.email = "Email is required.";
+    if (!phone) newErrors.phone = "Phone is required.";
+    if (!password) newErrors.password = "Password is required.";
+    if (!stateValue) newErrors.stateValue = "State is required.";
+    if (!city) newErrors.city = "City is required.";
+    if (!gstNumber) newErrors.gstNumber = "GST Number is required.";
+    if (!companyName) newErrors.companyName = "Company Name is required.";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleRegister = async () => {
-    // Check mandatory fields
-    if (
-      !name ||
-      !email ||
-      !phoneNumber ||
-      !stateIso ||
-      !city ||
-      !companyName ||
-      !companyGstNumber ||
-      !password
-    ) {
-      alert("Please fill in all mandatory fields.");
-      return;
-    }
-
-    // Find the selected state object to get the state's name
-    const selectedState = states.find((s) => s.isoCode === stateIso);
+    // Validate fields first
+    const isValid = validateFields();
+    if (!isValid) return;
 
     try {
-      // Post to /register with role "vendor" and include state name and city name
+      // Post to /register with the new field names; role defaults to "vendor"
       const response = await apiHelper.post("/register", {
         name,
         email,
-        phoneNumber,
-        state: selectedState ? selectedState.name : "",
-        city,
-        companyName,
-        companyGstNumber,
+        phone,
         password,
-        role: "vendor",
+        role: "vendor", // set role to vendor by default
+        state: stateValue,
+        city,
+        gstNumber,
+        companyName,
       });
 
-      // Check success
       if (!response.data.success) {
         alert(response.data.message || "Registration failed.");
       } else {
@@ -102,6 +105,14 @@ export default function Register(): JSX.Element {
       console.error("Registration error:", error);
       alert("An error occurred during registration.");
     }
+  };
+
+  // When the user selects a state isoCode, also set the local `stateValue` to the state name
+  const handleStateChange = (iso: string) => {
+    setSelectedStateIso(iso);
+    setCity(""); // reset city
+    const selected = allStates.find((s) => s.isoCode === iso);
+    setStateValue(selected ? selected.name : "");
   };
 
   return (
@@ -125,8 +136,8 @@ export default function Register(): JSX.Element {
                 </h4>
                 <p className="mb-8 text-sm font-medium text-gray-600 dark:text-gray-300">
                   Fields marked with{" "}
-                  <span className="text-xs text-red-500 align-super">★</span>{" "}
-                  are mandatory
+                  <span className="text-xs text-black align-super">*</span> are
+                  mandatory
                 </p>
               </div>
 
@@ -138,8 +149,8 @@ export default function Register(): JSX.Element {
                     className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
                     Name
-                    <span className="text-xs text-red-500 ml-1 align-super">
-                      ★
+                    <span className="text-xs text-black ml-1 align-super">
+                      *
                     </span>
                   </label>
                   <input
@@ -150,6 +161,9 @@ export default function Register(): JSX.Element {
                     className="w-full rounded-lg border border-gray-300 p-3 text-sm shadow-sm focus:border-yellow-500 focus:ring-yellow-500 dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
                     placeholder="Enter your full name"
                   />
+                  {errors.name && (
+                    <p className="text-red-500 text-sm">{errors.name}</p>
+                  )}
                 </div>
 
                 {/* Email */}
@@ -159,8 +173,8 @@ export default function Register(): JSX.Element {
                     className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
                     Email
-                    <span className="text-xs text-red-500 ml-1 align-super">
-                      ★
+                    <span className="text-xs text-black ml-1 align-super">
+                      *
                     </span>
                   </label>
                   <input
@@ -171,124 +185,33 @@ export default function Register(): JSX.Element {
                     className="w-full rounded-lg border border-gray-300 p-3 text-sm shadow-sm focus:border-yellow-500 focus:ring-yellow-500 dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
                     placeholder="Enter your email address"
                   />
+                  {errors.email && (
+                    <p className="text-red-500 text-sm">{errors.email}</p>
+                  )}
                 </div>
 
-                {/* Phone Number */}
+                {/* Phone */}
                 <div>
                   <label
-                    htmlFor="phoneNumber"
+                    htmlFor="phone"
                     className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
-                    Phone Number
-                    <span className="text-xs text-red-500 ml-1 align-super">
-                      ★
+                    Phone
+                    <span className="text-xs text-black ml-1 align-super">
+                      *
                     </span>
                   </label>
                   <input
-                    id="phoneNumber"
+                    id="phone"
                     type="tel"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
                     className="w-full rounded-lg border border-gray-300 p-3 text-sm shadow-sm focus:border-yellow-500 focus:ring-yellow-500 dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
                     placeholder="Enter your phone number"
                   />
-                </div>
-
-                {/* State */}
-                <div>
-                  <label
-                    htmlFor="state"
-                    className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
-                  >
-                    State
-                    <span className="text-xs text-red-500 ml-1 align-super">
-                      ★
-                    </span>
-                  </label>
-                  <select
-                    id="state"
-                    value={stateIso}
-                    onChange={(e) => {
-                      setStateIso(e.target.value);
-                      setCity(""); // clear city when state changes
-                    }}
-                    className="w-full rounded-lg border border-gray-300 p-3 text-sm shadow-sm focus:border-yellow-500 focus:ring-yellow-500 dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
-                  >
-                    <option value="">Select state</option>
-                    {states.map((st) => (
-                      <option key={st.isoCode} value={st.isoCode}>
-                        {st.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* City */}
-                <div>
-                  <label
-                    htmlFor="city"
-                    className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
-                  >
-                    City
-                    <span className="text-xs text-red-500 ml-1 align-super">
-                      ★
-                    </span>
-                  </label>
-                  <select
-                    id="city"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 p-3 text-sm shadow-sm focus:border-yellow-500 focus:ring-yellow-500 dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
-                  >
-                    <option value="">Select city</option>
-                    {cities.map((ct) => (
-                      <option key={ct.id} value={ct.name}>
-                        {ct.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Company Name */}
-                <div>
-                  <label
-                    htmlFor="companyName"
-                    className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
-                  >
-                    Company Name
-                    <span className="text-xs text-red-500 ml-1 align-super">
-                      ★
-                    </span>
-                  </label>
-                  <input
-                    id="companyName"
-                    type="text"
-                    value={companyName}
-                    onChange={(e) => setCompanyName(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 p-3 text-sm shadow-sm focus:border-yellow-500 focus:ring-yellow-500 dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
-                    placeholder="Enter your company name"
-                  />
-                </div>
-
-                {/* Company GST Number */}
-                <div>
-                  <label
-                    htmlFor="companyGstNumber"
-                    className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
-                  >
-                    Company GST Number
-                    <span className="text-xs text-red-500 ml-1 align-super">
-                      ★
-                    </span>
-                  </label>
-                  <input
-                    id="companyGstNumber"
-                    type="text"
-                    value={companyGstNumber}
-                    onChange={(e) => setCompanyGstNumber(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 p-3 text-sm shadow-sm focus:border-yellow-500 focus:ring-yellow-500 dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
-                    placeholder="Enter your company GST number"
-                  />
+                  {errors.phone && (
+                    <p className="text-red-500 text-sm">{errors.phone}</p>
+                  )}
                 </div>
 
                 {/* Password */}
@@ -298,8 +221,8 @@ export default function Register(): JSX.Element {
                     className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
                     Password
-                    <span className="text-xs text-red-500 ml-1 align-super">
-                      ★
+                    <span className="text-xs text-black ml-1 align-super">
+                      *
                     </span>
                   </label>
                   <input
@@ -310,6 +233,115 @@ export default function Register(): JSX.Element {
                     className="w-full rounded-lg border border-gray-300 p-3 text-sm shadow-sm focus:border-yellow-500 focus:ring-yellow-500 dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
                     placeholder="Enter a secure password"
                   />
+                  {errors.password && (
+                    <p className="text-red-500 text-sm">{errors.password}</p>
+                  )}
+                </div>
+
+                {/* State */}
+                <div>
+                  <label
+                    htmlFor="state"
+                    className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
+                  >
+                    State
+                    <span className="text-xs text-black ml-1 align-super">
+                      *
+                    </span>
+                  </label>
+                  <select
+                    id="state"
+                    value={selectedStateIso}
+                    onChange={(e) => handleStateChange(e.target.value)}
+                    className="w-full rounded-lg border border-gray-300 p-3 text-sm shadow-sm focus:border-yellow-500 focus:ring-yellow-500 dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
+                  >
+                    <option value="">Select state</option>
+                    {allStates.map((st) => (
+                      <option key={st.isoCode} value={st.isoCode}>
+                        {st.name}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.stateValue && (
+                    <p className="text-red-500 text-sm">{errors.stateValue}</p>
+                  )}
+                </div>
+
+                {/* City */}
+                <div>
+                  <label
+                    htmlFor="city"
+                    className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
+                  >
+                    City
+                    <span className="text-xs text-black ml-1 align-super">
+                      *
+                    </span>
+                  </label>
+                  <select
+                    id="city"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    className="w-full rounded-lg border border-gray-300 p-3 text-sm shadow-sm focus:border-yellow-500 focus:ring-yellow-500 dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
+                  >
+                    <option value="">Select city</option>
+                    {allCities.map((ct) => (
+                      <option key={ct.id} value={ct.name}>
+                        {ct.name}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.city && (
+                    <p className="text-red-500 text-sm">{errors.city}</p>
+                  )}
+                </div>
+
+                {/* GST Number */}
+                <div>
+                  <label
+                    htmlFor="gstNumber"
+                    className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
+                  >
+                    GST Number
+                    <span className="text-xs text-black ml-1 align-super">
+                      *
+                    </span>
+                  </label>
+                  <input
+                    id="gstNumber"
+                    type="text"
+                    value={gstNumber}
+                    onChange={(e) => setGstNumber(e.target.value)}
+                    className="w-full rounded-lg border border-gray-300 p-3 text-sm shadow-sm focus:border-yellow-500 focus:ring-yellow-500 dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
+                    placeholder="Enter your company GST number"
+                  />
+                  {errors.gstNumber && (
+                    <p className="text-red-500 text-sm">{errors.gstNumber}</p>
+                  )}
+                </div>
+
+                {/* Company Name */}
+                <div>
+                  <label
+                    htmlFor="companyName"
+                    className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
+                  >
+                    Company Name
+                    <span className="text-xs text-black ml-1 align-super">
+                      *
+                    </span>
+                  </label>
+                  <input
+                    id="companyName"
+                    type="text"
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                    className="w-full rounded-lg border border-gray-300 p-3 text-sm shadow-sm focus:border-yellow-500 focus:ring-yellow-500 dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
+                    placeholder="Enter your company name"
+                  />
+                  {errors.companyName && (
+                    <p className="text-red-500 text-sm">{errors.companyName}</p>
+                  )}
                 </div>
 
                 {/* Register Button */}
