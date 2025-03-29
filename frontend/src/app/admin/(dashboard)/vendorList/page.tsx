@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useEffect } from "react";
 import {
   Table,
@@ -15,6 +14,7 @@ import {
   Box,
   Button,
 } from "@mui/material";
+import Link from "next/link";
 import { axiosInstance } from "@/lib/axiosInstance";
 
 // Define the structure of a Vendor
@@ -170,7 +170,17 @@ const VendorsList: React.FC = () => {
               {vendors.length > 0 ? (
                 vendors.map((vendor) => (
                   <TableRow key={vendor._id}>
-                    <TableCell>{vendor.name}</TableCell>
+                    <TableCell>
+                      <Link
+                        href={`/admin/vendorList/${vendor._id}`}
+                        style={{
+                          color: "#1976d2",
+                          textDecoration: "underline",
+                        }}
+                      >
+                        {vendor.name}
+                      </Link>
+                    </TableCell>
                     <TableCell>{vendor.email}</TableCell>
                     <TableCell>{vendor.state}</TableCell>
                     <TableCell>{vendor.city}</TableCell>

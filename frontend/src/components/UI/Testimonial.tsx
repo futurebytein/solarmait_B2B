@@ -1,24 +1,41 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "keen-slider/keen-slider.min.css";
 import KeenSlider from "keen-slider";
+import { axiosInstance } from "@/lib/axiosInstance";
 
 interface Testimonial {
-  rating: number;
-  title: string;
+  user: {
+    name: string;
+    company: string;
+  };
   content: string;
-  author: string;
 }
 
-interface TestimonialSliderProps {
-  testimonials: Testimonial[];
-}
+const TestimonialSlider: React.FC = () => {
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
-const TestimonialSlider: React.FC<TestimonialSliderProps> = ({
-  testimonials,
-}) => {
-  React.useEffect(() => {
-    const keenSlider = new KeenSlider("#keen-slider", {
+  // Fetch testimonials from API endpoint
+  useEffect(() => {
+    axiosInstance
+      .get("b2b-testimonial/find-all")
+      .then((res) => {
+        if (res.data?.testimonials) {
+          setTestimonials(res.data.testimonials);
+        }
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error fetching testimonials:", err);
+        setLoading(false);
+      });
+  }, []);
+
+  // Initialize Keen Slider when testimonials are loaded
+  useEffect(() => {
+    if (testimonials.length === 0) return;
+    const slider = new KeenSlider("#keen-slider", {
       loop: true,
       slides: {
         origin: "center",
@@ -36,24 +53,26 @@ const TestimonialSlider: React.FC<TestimonialSliderProps> = ({
       },
     });
 
-    const keenSliderPrevious = document.getElementById("keen-slider-previous");
-    const keenSliderNext = document.getElementById("keen-slider-next");
-    const keenSliderPreviousDesktop = document.getElementById(
-      "keen-slider-previous-desktop"
-    );
-    const keenSliderNextDesktop = document.getElementById(
-      "keen-slider-next-desktop"
-    );
+    const prev = document.getElementById("keen-slider-previous");
+    const next = document.getElementById("keen-slider-next");
+    const prevDesktop = document.getElementById("keen-slider-previous-desktop");
+    const nextDesktop = document.getElementById("keen-slider-next-desktop");
 
-    keenSliderPrevious?.addEventListener("click", () => keenSlider.prev());
-    keenSliderNext?.addEventListener("click", () => keenSlider.next());
-    keenSliderPreviousDesktop?.addEventListener("click", () =>
-      keenSlider.prev()
-    );
-    keenSliderNextDesktop?.addEventListener("click", () => keenSlider.next());
+    prev?.addEventListener("click", () => slider.prev());
+    next?.addEventListener("click", () => slider.next());
+    prevDesktop?.addEventListener("click", () => slider.prev());
+    nextDesktop?.addEventListener("click", () => slider.next());
 
-    return () => keenSlider.destroy();
-  }, []);
+    return () => slider.destroy();
+  }, [testimonials]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <p>Loading testimonials...</p>
+      </div>
+    );
+  }
 
   return (
     <section className="bg-[#FFF7E6] lg:pr-30">
@@ -65,8 +84,8 @@ const TestimonialSlider: React.FC<TestimonialSliderProps> = ({
             </h2>
 
             <p className="mt-4 text-gray-700">
-              Lorem ipsum, dolor sit amet consectetur adipisicing elit. Voluptas
-              veritatis illo placeat harum porro optio fugit a culpa sunt id!
+              Our clients have experienced outstanding results – see what they
+              have to say about us!
             </p>
 
             <div className="hidden lg:mt-8 lg:flex lg:gap-4">
@@ -117,28 +136,13 @@ const TestimonialSlider: React.FC<TestimonialSliderProps> = ({
           <div className="-mx-6 lg:col-span-2 lg:mx-0">
             <div id="keen-slider" className="keen-slider">
               {testimonials.map((testimonial, index) => (
-                <div className="keen-slider__slide " key={index}>
-                  <blockquote className="flex h-full flex-col justify-between bg-[white] p-6 shadow-xs sm:p-8 lg:p-12">
+                <div className="keen-slider__slide" key={index}>
+                  <blockquote className="flex h-full flex-col justify-between bg-white p-6 shadow-xs sm:p-8 lg:p-12">
                     <div>
-                      <div className="flex gap-0.5 text-green-500">
-                        {Array.from({ length: testimonial.rating }).map(
-                          (_, idx) => (
-                            <svg
-                              key={idx}
-                              className="size-5"
-                              fill="currentColor"
-                              viewBox="0 0 20 20"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                            </svg>
-                          )
-                        )}
-                      </div>
-
                       <div className="mt-4">
                         <p className="text-2xl font-bold text-black sm:text-3xl">
-                          {testimonial.title}
+                          {/* Optionally, you can add a title here */}
+                          Testimonial
                         </p>
                         <p className="mt-4 leading-relaxed text-gray-700">
                           {testimonial.content}
@@ -147,7 +151,8 @@ const TestimonialSlider: React.FC<TestimonialSliderProps> = ({
                     </div>
 
                     <footer className="mt-4 text-sm font-medium text-gray-700 sm:mt-6">
-                      &mdash; {testimonial.author}
+                      &mdash; {testimonial.user.name},{" "}
+                      {testimonial.user.company}
                     </footer>
                   </blockquote>
                 </div>

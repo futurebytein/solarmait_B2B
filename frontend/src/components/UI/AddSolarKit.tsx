@@ -37,6 +37,7 @@ const AddSolarKit: React.FC<AddSolarKitProps> = ({
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [kitCategory, setKitCategory] = useState<string>(""); // New category field
+  const [kitImage, setKitImage] = useState<File | null>(null); // New image field for kit cover image
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [searchResults, setSearchResults] = useState<Product[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
@@ -98,15 +99,18 @@ const AddSolarKit: React.FC<AddSolarKitProps> = ({
     setError("");
     setSubmitting(true);
 
-    const payload = {
-      name: name.trim(),
-      description: description.trim(),
-      category: kitCategory, // include category in payload
-      products: selectedProducts.map((p) => p._id),
-    };
+    // Create FormData payload for file upload
+    const formData = new FormData();
+    formData.append("name", name.trim());
+    formData.append("description", description.trim());
+    formData.append("category", kitCategory);
+    if (kitImage) {
+      formData.append("kit_image", kitImage);
+    }
+    selectedProducts.forEach((p) => formData.append("products", p._id));
 
     try {
-      await axiosInstance.post("products/solar-kit/add", payload);
+      await axiosInstance.post("products/solar-kit/add", formData);
       setSubmitting(false);
       onSolarKitAdded(); // refresh the list in parent
     } catch (err) {
@@ -145,7 +149,7 @@ const AddSolarKit: React.FC<AddSolarKitProps> = ({
         onChange={(e) => setDescription(e.target.value)}
       />
 
-      {/* New Category Field */}
+      {/* Category Field */}
       <FormControl fullWidth margin="normal">
         <InputLabel id="solar-kit-category-label">Category</InputLabel>
         <Select
@@ -158,6 +162,24 @@ const AddSolarKit: React.FC<AddSolarKitProps> = ({
           <MenuItem value="OffGrid">OffGrid</MenuItem>
           <MenuItem value="Hybrid">Hybrid</MenuItem>
         </Select>
+      </FormControl>
+
+      {/* Cover Image Upload Field */}
+      <FormControl fullWidth margin="normal">
+        <InputLabel shrink htmlFor="kit-image">
+          Cover Image
+        </InputLabel>
+        <input
+          id="kit-image"
+          type="file"
+          accept="image/*"
+          onChange={(e) => {
+            if (e.target.files && e.target.files.length > 0) {
+              setKitImage(e.target.files[0]);
+            }
+          }}
+          style={{ marginTop: "8px" }}
+        />
       </FormControl>
 
       {/* Search Field */}

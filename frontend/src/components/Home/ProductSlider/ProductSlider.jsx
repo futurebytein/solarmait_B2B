@@ -124,7 +124,7 @@ const ProductSlider = ({ category }) => {
   const getItemImage = (item) => {
     if (category === "solar-kit") {
       // If solar kits don't have direct images, use placeholder or derive from item.products
-      return "/placeholder-solar-kit.png";
+      return item.kit_image ? item.kit_image : "/kit-image.png";
     }
     // For standard products, use the first product image or a placeholder
     return item.product_images && item.product_images.length > 0
@@ -138,7 +138,7 @@ const ProductSlider = ({ category }) => {
         {/* Header Row: Title + "View More" Button */}
         <div className="flex items-center justify-between">
           <h2 className="text-3xl font-bold text-blue-700">
-            {formatCategoryName(category)} Range
+            {formatCategoryName(category)}
           </h2>
           <Link href={`/products?category=${category}`}>
             <button

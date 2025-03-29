@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
-import Cookies from "js-cookie";
 import { useAuth } from "@/contexts/AuthContext";
 
 const Header = () => {
@@ -12,10 +11,9 @@ const Header = () => {
 
   const router = useRouter();
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    Cookies.remove("token");
-    router.push("/");
+  const handleLogout = (e) => {
+    e.stopPropagation();
+    logout();
   };
 
   const handleProfileClick = () => {

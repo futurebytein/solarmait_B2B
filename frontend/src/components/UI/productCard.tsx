@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Card,
   CardContent,
@@ -10,6 +10,7 @@ import {
 import Link from "next/link";
 import { axiosInstance } from "@/lib/axiosInstance";
 import { useAuth } from "@/contexts/AuthContext";
+import RequestProductModal from "@/components/UI/RequestProductModal";
 
 // Define Product type
 interface Product {
@@ -18,14 +19,10 @@ interface Product {
   description: string;
   price: number;
   product_images?: string[]; // Optional array of image URLs
+  stock: number; // New property to determine availability
 }
 
 // Define User type
-
-// Define Props type
-interface ProductCardProps {
-  product: Product;
-}
 interface User {
   _id: string;
   name: string;
@@ -34,8 +31,14 @@ interface User {
   cart?: string[]; // Optional, for future cart updates
 }
 
+// Define Props type
+interface ProductCardProps {
+  product: Product;
+}
+
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { user, setUserAndSync } = useAuth(); // To update user's cart locally
+  const [openRequestModal, setOpenRequestModal] = useState(false);
 
   const handleAddToCart = async () => {
     try {
@@ -52,7 +55,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         // Update the user object with the cart containing only product IDs
         const updatedUser: User = {
           ...user,
-          _id: user?._id ?? "", // ✅ Ensure _id is always a string
+          _id: user?._id ?? "",
           name: user?.name ?? "",
           email: user?.email ?? "",
           role: user?.role ?? "",
@@ -82,7 +85,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         // Update the user object with the updated cart containing only product IDs
         const updatedUser: User = {
           ...user,
-          _id: user?._id ?? "", // ✅ Ensure _id is always a string
+          _id: user?._id ?? "",
           name: user?.name ?? "",
           email: user?.email ?? "",
           role: user?.role ?? "",
@@ -99,7 +102,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   return (
     <Card
       sx={{
-        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        height: "100%", // ensures the card takes full height
         boxShadow: 3,
         padding: 1,
         border: "1px solid #e0e0e0",
@@ -109,10 +115,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         },
       }}
     >
+      {/* Image Link at the top */}
       <Link href={`/products/${product._id}`} passHref>
         <CardMedia
           component="img"
-          image={product.product_images?.[0] || "/default-product.png"} // Safe access with optional chaining
+          image={product.product_images?.[0] || "/default-product.png"}
           alt={product.name}
           sx={{
             height: 180,
@@ -122,7 +129,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           }}
         />
       </Link>
-      <CardContent>
+
+      <CardContent
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          flexGrow: 1, // so the content area can stretch
+        }}
+      >
+        {/* Title, Description, Price */}
         <Typography
           variant="h6"
           component="div"
@@ -143,7 +158,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           ₹{product.price.toLocaleString()}
         </Typography>
 
-        <Stack direction="column" spacing={2} sx={{ marginTop: 2 }}>
+        {/* Buttons row at the bottom */}
+        <Stack
+          direction="row"
+          spacing={2}
+          sx={{
+            marginTop: "auto", // pushes buttons to bottom of CardContent
+            alignItems: "center", // vertically center the row
+          }}
+        >
           {/* View Details Button */}
           <Link href={`/products/${product._id}`} passHref>
             <Button
@@ -160,18 +183,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
           {/* Add or Remove from Cart Button */}
           {user?.cart?.includes(product._id) ? (
-            <>
-              <Typography variant="body2" color="textSecondary">
-                Already added to Cart
-              </Typography>
-              <Button
-                variant="outlined"
-                color="error"
-                onClick={handleRemoveFromCart}
-              >
-                Remove from Cart
-              </Button>
-            </>
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={handleRemoveFromCart}
+            >
+              Remove from Cart
+            </Button>
           ) : (
             <Button
               variant="outlined"

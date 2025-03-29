@@ -2,14 +2,7 @@
 import { useEffect, useState, useRef } from "react";
 import Avatar from "react-avatar";
 import Link from "next/link";
-import {
-  FaFacebook,
-  FaLinkedin,
-  FaInstagram,
-  FaTwitter,
-  FaYoutube,
-  FaChevronDown,
-} from "react-icons/fa";
+import { FaChevronDown } from "react-icons/fa";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
@@ -18,18 +11,18 @@ import { HiMenuAlt3, HiX } from "react-icons/hi";
 import Image from "next/image";
 
 const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
   const { user, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const dropdownRef = useRef(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const toggleMenu = () => {
-    setIsOpen(!isOpen);
+    setIsOpen((prev) => !prev);
   };
 
-  const handleLogout = (e) => {
+  const handleLogout = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     logout();
     setDropdownOpen(false);
@@ -37,12 +30,14 @@ const Navbar = () => {
 
   const cartCount = user?.cart?.length || 0;
 
-  const isActive = (path) => pathname === path;
+  const isActive = (path: string): boolean => pathname === path;
 
-  // Close user dropdown if clicking outside
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setDropdownOpen(false);
       }
     };
@@ -52,7 +47,7 @@ const Navbar = () => {
   }, []);
 
   const handleDashboard = () => {
-    if (user.gst_verified) {
+    if (user?.gst_verified) {
       router.push("/admin");
     } else {
       router.push("/profile");
@@ -132,7 +127,7 @@ const Navbar = () => {
 
           {/* Right side icons */}
           <div className="flex items-center gap-6">
-            <Link href={`${user ? "/cart" : "/login"}`}>
+            <Link href={user ? "/cart" : "/login"}>
               <Badge badgeContent={cartCount} color="primary" showZero={false}>
                 <ShoppingCartIcon
                   fontSize="large"
@@ -144,7 +139,7 @@ const Navbar = () => {
             {user ? (
               <div ref={dropdownRef} className="relative">
                 <button
-                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  onClick={() => setDropdownOpen((prev) => !prev)}
                   className="flex items-center gap-2 p-2 rounded hover:bg-gray-200 focus:outline-none"
                 >
                   <Avatar
@@ -170,6 +165,13 @@ const Navbar = () => {
                         ? "Go to Dashboard"
                         : "Get GST Verified"}
                     </button>
+                    <Link
+                      href={"/profile"}
+                      // onClick={handleLogout}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Profile
+                    </Link>
                     <button
                       onClick={handleLogout}
                       className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
