@@ -1,14 +1,23 @@
 "use client";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function Login(): JSX.Element {
-  const { login } = useAuth();
+  const { login, user } = useAuth();
+  const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  // Redirect if user is already logged in
+  useEffect(() => {
+    if (user) {
+      router.push("/");
+    }
+  }, [user, router]);
 
   const handleLogin = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -53,7 +62,7 @@ export default function Login(): JSX.Element {
                     Please login to your account
                   </p>
 
-                  {/* Username Input */}
+                  {/* Email Input */}
                   <div className="mb-6">
                     <label
                       htmlFor="email"

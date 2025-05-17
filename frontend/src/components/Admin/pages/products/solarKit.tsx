@@ -18,6 +18,13 @@ import {
   DialogContent,
   DialogActions,
   IconButton,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Grid,
+  Card,
+  CardMedia,
 } from "@mui/material";
 import { Visibility } from "@mui/icons-material";
 import { axiosInstance } from "@/lib/axiosInstance";
@@ -28,7 +35,7 @@ interface SolarKit {
   name: string;
   description: string;
   products: string[];
-  technical_docs: string[]; // <-- new field
+  technical_docs: string[];
   category: string;
 }
 
@@ -43,6 +50,12 @@ const SolarKitsTable = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
 
+  // Filter states for solar kits
+  const [subCategories, setSubCategories] = useState<string[]>([]);
+  const [selectedSubCategory, setSelectedSubCategory] = useState<string>("");
+  const [vendors, setVendors] = useState<{ _id: string; name: string }[]>([]);
+  const [selectedVendor, setSelectedVendor] = useState<string>("");
+
   // State for Add Kit modal
   const [openAddModal, setOpenAddModal] = useState<boolean>(false);
 
@@ -50,12 +63,18 @@ const SolarKitsTable = () => {
   const [openViewModal, setOpenViewModal] = useState<boolean>(false);
   const [selectedKit, setSelectedKit] = useState<SolarKit | null>(null);
 
-  // Fetch solar kits
+  // Fetch solar kits with filters
   const fetchSolarKits = async () => {
     try {
       setLoading(true);
       const response = await axiosInstance.get<SolarKitsResponse>(
-        "products/solar-kit/get-all"
+        "products/solar-kit/get-all",
+        {
+          params: {
+            subCategory: selectedSubCategory,
+            vendor: selectedVendor,
+          },
+        }
       );
       setSolarKits(response.data.solar_kits);
       setLoading(false);
@@ -66,9 +85,41 @@ const SolarKitsTable = () => {
     }
   };
 
+  // Fetch filters for solar kits
+  const fetchFilters = async () => {
+    try {
+      const subCatRes = await axiosInstance.get(
+        `/products/all-subCategories?category=solar-kit`
+      );
+      if (subCatRes.data?.success) {
+        setSubCategories(subCatRes.data.subCategories || []);
+      } else {
+        setSubCategories([]);
+      }
+      const vendorsRes = await axiosInstance.get(
+        `/products/all-vendors?category=solar-kit`
+      );
+      if (vendorsRes.data?.success) {
+        setVendors(vendorsRes.data.vendors || []);
+      } else {
+        setVendors([]);
+      }
+      setSelectedSubCategory("");
+      setSelectedVendor("");
+    } catch (error) {
+      console.error("Failed to fetch filters for solar kits:", error);
+      setSubCategories([]);
+      setVendors([]);
+    }
+  };
+
+  useEffect(() => {
+    fetchFilters();
+  }, []);
+
   useEffect(() => {
     fetchSolarKits();
-  }, []);
+  }, [selectedSubCategory, selectedVendor]);
 
   // Open View Kit modal and set selected kit
   const handleViewKit = (kit: SolarKit) => {
@@ -78,7 +129,6 @@ const SolarKitsTable = () => {
 
   return (
     <Box sx={{ padding: 2 }}>
-      {/* Loading & Error States */}
       {loading && (
         <Box display="flex" justifyContent="center" mt={2}>
           <CircularProgress />
@@ -89,10 +139,48 @@ const SolarKitsTable = () => {
           Error: {error.message}
         </Typography>
       )}
-
-      {/* Main Content */}
       {!loading && !error && (
         <>
+          {/* Filter Section */}
+          <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 2 }}>
+            <FormControl variant="outlined" size="small" sx={{ minWidth: 200 }}>
+              <InputLabel>Sub-Category</InputLabel>
+              <Select
+                label="Sub-Category"
+                value={selectedSubCategory}
+                onChange={(e) =>
+                  setSelectedSubCategory(e.target.value as string)
+                }
+              >
+                <MenuItem value="">
+                  <em>All Sub-Categories</em>
+                </MenuItem>
+                {subCategories.map((subCat, idx) => (
+                  <MenuItem key={idx} value={subCat}>
+                    {subCat}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl variant="outlined" size="small" sx={{ minWidth: 200 }}>
+              <InputLabel>Vendors</InputLabel>
+              <Select
+                label="Vendors"
+                value={selectedVendor}
+                onChange={(e) => setSelectedVendor(e.target.value as string)}
+              >
+                <MenuItem value="">
+                  <em>All Vendors</em>
+                </MenuItem>
+                {vendors.map((vendor) => (
+                  <MenuItem key={vendor._id} value={vendor._id}>
+                    {vendor.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+
           {/* Add Solar Kit Button */}
           <Button variant="contained" onClick={() => setOpenAddModal(true)}>
             Add Solar Kit
@@ -128,7 +216,7 @@ const SolarKitsTable = () => {
                         <TableCell>{kit.name}</TableCell>
                         <TableCell>{kit.description}</TableCell>
                         <TableCell>{kit.products?.length || 0}</TableCell>
-                        <TableCell>{kit?.category || 0}</TableCell>
+                        <TableCell>{kit.category}</TableCell>
                         <TableCell>
                           <IconButton
                             color="primary"
@@ -141,7 +229,7 @@ const SolarKitsTable = () => {
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={4} align="center">
+                      <TableCell colSpan={5} align="center">
                         No solar kits found.
                       </TableCell>
                     </TableRow>
@@ -195,7 +283,6 @@ const SolarKitsTable = () => {
               <Typography variant="subtitle1" sx={{ mb: 1 }}>
                 Description: {selectedKit.description}
               </Typography>
-
               <Typography
                 variant="subtitle1"
                 sx={{ fontWeight: "bold", mt: 2 }}
@@ -213,8 +300,6 @@ const SolarKitsTable = () => {
                   No products in this kit.
                 </Typography>
               )}
-
-              {/* Technical Docs */}
               <Typography
                 variant="subtitle1"
                 sx={{ fontWeight: "bold", mt: 2 }}
@@ -232,7 +317,7 @@ const SolarKitsTable = () => {
                         rel="noopener noreferrer"
                         style={{ color: "#1976d2" }}
                       >
-                        {docUrl}
+                        Document {index + 1}
                       </a>
                     </li>
                   ))}

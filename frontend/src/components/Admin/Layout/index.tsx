@@ -24,7 +24,7 @@ export default function DefaultLayout({ children }: DefaultLayoutProps) {
         }`}
       >
         <Navigation />
-        <main className="flex-1 min-h-scren bg-gray-200 px-10">
+        <main className="flex-1 min-h-scren  px-10">
           <div className="mx-auto max-w-screen  p-4 md:p-6 2xl:p-10">
             {loading ? (
               <div className="flex items-center justify-center p-8">

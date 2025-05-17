@@ -216,7 +216,7 @@ const AddProduct: React.FC<AddProductProps> = ({ onProductAdded }) => {
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>Add New Product</DialogTitle>
         <DialogContent>
-          {/* Basic product fields */}
+          {/* Basic product fields */}x
           <TextField
             margin="dense"
             label="Name"
@@ -244,7 +244,6 @@ const AddProduct: React.FC<AddProductProps> = ({ onProductAdded }) => {
             onChange={handleChange}
             required
           />
-
           <Select
             fullWidth
             name="category"
@@ -264,7 +263,6 @@ const AddProduct: React.FC<AddProductProps> = ({ onProductAdded }) => {
               </MenuItem>
             ))}
           </Select>
-
           <TextField
             margin="dense"
             label="Brand"
@@ -292,7 +290,6 @@ const AddProduct: React.FC<AddProductProps> = ({ onProductAdded }) => {
             value={newProduct.tags}
             onChange={handleChange}
           />
-
           {/* New fields */}
           <TextField
             margin="dense"
@@ -346,7 +343,6 @@ const AddProduct: React.FC<AddProductProps> = ({ onProductAdded }) => {
             value={newProduct.gstPerc}
             onChange={handleChange}
           />
-
           {/* Specifications: dynamic key-value inputs */}
           <Typography style={{ marginTop: "1rem" }}>Specifications:</Typography>
           <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
@@ -382,7 +378,6 @@ const AddProduct: React.FC<AddProductProps> = ({ onProductAdded }) => {
               ))}
             </div>
           )}
-
           {/* File inputs */}
           <Typography style={{ marginTop: "1rem" }}>Cover Image:</Typography>
           <input
@@ -391,7 +386,6 @@ const AddProduct: React.FC<AddProductProps> = ({ onProductAdded }) => {
             onChange={handleCoverImageChange}
             style={{ marginTop: "0.5rem" }}
           />
-
           <Typography style={{ marginTop: "1rem" }}>
             Product Images (multiple):
           </Typography>
@@ -402,7 +396,6 @@ const AddProduct: React.FC<AddProductProps> = ({ onProductAdded }) => {
             onChange={handleProductImagesChange}
             style={{ marginTop: "0.5rem" }}
           />
-
           <Typography style={{ marginTop: "1rem" }}>
             Technical Documents (PDFs):
           </Typography>

@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { LayoutDashboard, ClipboardList } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const menuGroups = [
   {
@@ -14,7 +15,6 @@ const menuGroups = [
         label: "Dashboard",
         route: "/admin",
       },
-
       {
         icon: <ClipboardList className="w-6 h-6" />,
         label: "Product List",
@@ -24,16 +24,6 @@ const menuGroups = [
         icon: <ClipboardList className="w-6 h-6" />,
         label: "Vendors List",
         route: "/admin/vendorList",
-      },
-      {
-        icon: <ClipboardList className="w-6 h-6" />,
-        label: "Blogs",
-        route: "/admin/blogs",
-      },
-      {
-        icon: <ClipboardList className="w-6 h-6" />,
-        label: "Manage Banners",
-        route: "/admin/carousel",
       },
       {
         icon: <ClipboardList className="w-6 h-6" />,
@@ -62,6 +52,19 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen }) => {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const { user } = useAuth();
+
+  // Filter menu items based on user role:
+  // If vendor, only show "Wallet" and "Product List"
+  const filteredMenuGroups = menuGroups.map((group) => ({
+    ...group,
+    menuItems: group.menuItems.filter((item) => {
+      if (user?.role === "vendor") {
+        return item.label === "Wallet" || item.label === "Product List";
+      }
+      return true; // admin gets all
+    }),
+  }));
 
   return (
     <>
@@ -92,7 +95,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen }) => {
       )}
 
       <aside
-        className={`fixed left-0 top-0 z-50 flex h-screen w-72 flex-col bg-white text-black transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`fixed left-0 top-0 z-50 flex h-screen w-72 flex-col bg-white text-black border-r border-gray-300 transition-transform duration-300 ease-in-out lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -130,7 +133,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen }) => {
 
         <div className="flex-1 overflow-y-auto">
           <nav className="p-4">
-            {menuGroups.map((group, groupIndex) => (
+            {filteredMenuGroups.map((group, groupIndex) => (
               <div key={groupIndex} className="mb-6">
                 {group.name && (
                   <h3 className="px-3 mb-2 text-xs font-semibold uppercase text-gray-500">

@@ -119,7 +119,7 @@ const ProductDescription: React.FC<ProductDescriptionProps> = ({ product }) => {
             fontWeight: "bold",
           }}
         />
-        <FavoriteBorderIcon sx={{ cursor: "pointer", color: "#D4AF37" }} />
+        {/* <FavoriteBorderIcon sx={{ cursor: "pointer", color: "#D4AF37" }} /> */}
       </Box>
 
       {/* Product Title */}
@@ -145,13 +145,13 @@ const ProductDescription: React.FC<ProductDescriptionProps> = ({ product }) => {
           ₹{product.price}{" "}
           <span style={{ fontSize: "16px" }}>(Inclusive of GST)</span>
         </Typography>
-        <Typography variant="h6" sx={{ color: "#1D7A02", fontWeight: "bold" }}>
+        {/* <Typography variant="h6" sx={{ color: "#1D7A02", fontWeight: "bold" }}>
           ₹{"product.subsidy"} Available Subsidy
-        </Typography>
+        </Typography> */}
       </Box>
 
       {/* EMI Section */}
-      <Box display="flex" alignItems="center" gap={1} sx={{ marginTop: 3 }}>
+      {/* <Box display="flex" alignItems="center" gap={1} sx={{ marginTop: 3 }}>
         <img src="/emi-icon.png" alt="EMI" width={24} height={24} />
         <Typography variant="h6" sx={{ color: "black" }}>
           EMI from{" "}
@@ -160,7 +160,6 @@ const ProductDescription: React.FC<ProductDescriptionProps> = ({ product }) => {
         </Typography>
       </Box>
 
-      {/* Action Buttons */}
       <Grid container spacing={2} sx={{ marginTop: 3 }}>
         <Grid item xs={12} sm={6}>
           <Button
@@ -192,7 +191,7 @@ const ProductDescription: React.FC<ProductDescriptionProps> = ({ product }) => {
             BOOK CONSULTATION
           </Button>
         </Grid>
-      </Grid>
+      </Grid> */}
 
       {/* Loan Section */}
       <Box

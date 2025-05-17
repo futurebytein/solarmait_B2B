@@ -32,14 +32,14 @@ const Sponsors = () => {
             {sponsors.map((el, index) => (
               <div
                 key={index}
-                className="flex-shrink-0 grid place-items-center w-[clamp(8rem,1rem+20vmin,15rem)] px-4"
+                className="flex-shrink-0 grid place-items-center w-[clamp(12rem,2rem+25vmin,20rem)] px-6"
               >
                 <Image
-                  width={200}
-                  height={200}
+                  width={400}
+                  height={400}
                   src={el}
                   alt={`Sponsor ${index + 1}`}
-                  className="object-contain w-full h-auto rounded-md shadow-lg"
+                  className="object-contain w-full h-auto rounded-lg shadow-xl"
                 />
               </div>
             ))}
@@ -48,14 +48,14 @@ const Sponsors = () => {
             {sponsors.map((el, index) => (
               <div
                 key={index}
-                className="flex-shrink-0 grid place-items-center w-[clamp(8rem,1rem+20vmin,15rem)] px-4"
+                className="flex-shrink-0 grid place-items-center w-[clamp(12rem,2rem+25vmin,20rem)] px-6"
               >
                 <Image
-                  width={200}
-                  height={200}
+                  width={400}
+                  height={400}
                   src={el}
                   alt={`Sponsor ${index + 1}`}
-                  className="object-contain w-full h-auto rounded-md shadow-lg"
+                  className="object-contain w-full h-auto rounded-lg shadow-xl"
                 />
               </div>
             ))}

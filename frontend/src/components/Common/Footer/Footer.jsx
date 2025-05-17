@@ -106,12 +106,6 @@ const Footer = () => {
         </div>
         <div className="flex justify-end ">
           <div className=" ">
-            <p
-              data-aos="fade-down"
-              className="out font-bold text-[white] mb-8 max-[855px]:mb-6"
-            >
-              Blogs & Updates
-            </p>
             <div className="flex flex-col gap-4 ">
               <Link
                 data-aos="fade-up"

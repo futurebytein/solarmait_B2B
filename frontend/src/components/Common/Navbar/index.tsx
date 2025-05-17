@@ -47,7 +47,7 @@ const Navbar = () => {
   }, []);
 
   const handleDashboard = () => {
-    if (user?.gst_verified) {
+    if (user?.gst_verified || user?.role === "admin") {
       router.push("/admin");
     } else {
       router.push("/profile");
@@ -161,7 +161,7 @@ const Navbar = () => {
                       onClick={handleDashboard}
                       className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     >
-                      {user.gst_verified
+                      {user.gst_verified || user.role === "admin"
                         ? "Go to Dashboard"
                         : "Get GST Verified"}
                     </button>

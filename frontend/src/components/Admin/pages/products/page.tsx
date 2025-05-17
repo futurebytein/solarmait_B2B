@@ -24,6 +24,10 @@ import {
   Grid,
   Card,
   CardMedia,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import { Edit, Delete, Visibility } from "@mui/icons-material";
 import { axiosInstance } from "@/lib/axiosInstance";
@@ -43,6 +47,16 @@ interface Product {
   technical_docs: string[];
 }
 
+// Additional filter types
+type MainCategory = "pannel" | "inverter" | "battery" | "solar_components";
+
+const mainCategories: MainCategory[] = [
+  "pannel",
+  "inverter",
+  "battery",
+  "solar_components",
+];
+
 const ProductsTable = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -53,6 +67,14 @@ const ProductsTable = () => {
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(5);
 
+  // Filter states
+  const [selectedMainCategory, setSelectedMainCategory] =
+    useState<MainCategory>("pannel");
+  const [subCategories, setSubCategories] = useState<string[]>([]);
+  const [selectedSubCategory, setSelectedSubCategory] = useState<string>("");
+  const [vendors, setVendors] = useState<{ _id: string; name: string }[]>([]);
+  const [selectedVendor, setSelectedVendor] = useState<string>("");
+
   // Edit and delete states
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [deleteProductId, setDeleteProductId] = useState<string | null>(null);
@@ -62,7 +84,7 @@ const ProductsTable = () => {
   const [viewDocsModal, setViewDocsModal] = useState<boolean>(false);
   const [modalContent, setModalContent] = useState<string[]>([]);
 
-  // Fetch products with pagination
+  // Fetch products with pagination & filters
   const fetchAllProducts = async (currentPage = 1, currentLimit = 5) => {
     try {
       setLoading(true);
@@ -71,6 +93,9 @@ const ProductsTable = () => {
         total: number;
       }>("products/all-products", {
         params: {
+          category: selectedMainCategory,
+          subCategory: selectedSubCategory,
+          vendor: selectedVendor,
           page: currentPage,
           limit: currentLimit,
         },
@@ -89,9 +114,48 @@ const ProductsTable = () => {
     }
   };
 
+  // Fetch sub-categories and vendors when main category changes
+  const fetchFilters = async (category: MainCategory) => {
+    try {
+      const subCatRes = await axiosInstance.get(
+        `/products/all-subCategories?category=${category}`
+      );
+      if (subCatRes.data?.success) {
+        setSubCategories(subCatRes.data.subCategories || []);
+      } else {
+        setSubCategories([]);
+      }
+      const vendorsRes = await axiosInstance.get(
+        `/products/all-vendors?category=${category}`
+      );
+      if (vendorsRes.data?.success) {
+        setVendors(vendorsRes.data.vendors || []);
+      } else {
+        setVendors([]);
+      }
+      setSelectedSubCategory("");
+      setSelectedVendor("");
+    } catch (error) {
+      console.error("Failed to fetch filters:", error);
+      setSubCategories([]);
+      setVendors([]);
+    }
+  };
+
+  // Fetch products and filters on mount and when dependencies change
   useEffect(() => {
     fetchAllProducts(page + 1, rowsPerPage);
-  }, [page, rowsPerPage]);
+  }, [
+    page,
+    rowsPerPage,
+    selectedMainCategory,
+    selectedSubCategory,
+    selectedVendor,
+  ]);
+
+  useEffect(() => {
+    fetchFilters(selectedMainCategory);
+  }, [selectedMainCategory]);
 
   // Handle page change
   const handleChangePage = (
@@ -143,31 +207,64 @@ const ProductsTable = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div
-        style={{ display: "flex", justifyContent: "center", marginTop: "2rem" }}
-      >
-        <CircularProgress />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <Typography
-        color="error"
-        align="center"
-        variant="h6"
-        style={{ marginTop: "2rem" }}
-      >
-        Error: {error.message}
-      </Typography>
-    );
-  }
-
   return (
     <Box sx={{ overflowX: "auto", padding: 2 }}>
+      {/* Filter Section */}
+      <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 2 }}>
+        <FormControl variant="outlined" size="small" sx={{ minWidth: 200 }}>
+          <InputLabel>Main Category</InputLabel>
+          <Select
+            label="Main Category"
+            value={selectedMainCategory}
+            onChange={(e) =>
+              setSelectedMainCategory(e.target.value as MainCategory)
+            }
+          >
+            {mainCategories.map((cat) => (
+              <MenuItem key={cat} value={cat}>
+                {cat.toUpperCase()}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl variant="outlined" size="small" sx={{ minWidth: 200 }}>
+          <InputLabel>Sub-Category</InputLabel>
+          <Select
+            label="Sub-Category"
+            value={selectedSubCategory}
+            onChange={(e) => setSelectedSubCategory(e.target.value as string)}
+          >
+            <MenuItem value="">
+              <em>All Sub-Categories</em>
+            </MenuItem>
+            {subCategories.map((subCat, idx) => (
+              <MenuItem key={idx} value={subCat}>
+                {subCat}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl variant="outlined" size="small" sx={{ minWidth: 200 }}>
+          <InputLabel>Vendors</InputLabel>
+          <Select
+            label="Vendors"
+            value={selectedVendor}
+            onChange={(e) => setSelectedVendor(e.target.value as string)}
+          >
+            <MenuItem value="">
+              <em>All Vendors</em>
+            </MenuItem>
+            {vendors.map((vendor) => (
+              <MenuItem key={vendor._id} value={vendor._id}>
+                {vendor.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Box>
+
       {/* Add Product Button */}
       <AddProduct
         onProductAdded={() => fetchAllProducts(page + 1, rowsPerPage)}
@@ -215,7 +312,6 @@ const ProductsTable = () => {
               {products.length > 0 ? (
                 products.map((product) => (
                   <TableRow key={product._id}>
-                    {/* Cover Image */}
                     <TableCell>
                       <img
                         src={product.cover_image}
@@ -232,8 +328,6 @@ const ProductsTable = () => {
                     <TableCell>{product.price}</TableCell>
                     <TableCell>{product.category}</TableCell>
                     <TableCell>{product.stock}</TableCell>
-
-                    {/* View Product Images */}
                     <TableCell>
                       <Tooltip title="View Images">
                         <IconButton
@@ -245,8 +339,6 @@ const ProductsTable = () => {
                         </IconButton>
                       </Tooltip>
                     </TableCell>
-
-                    {/* View Technical Docs */}
                     <TableCell>
                       <Tooltip title="View Documents">
                         <IconButton
@@ -258,16 +350,12 @@ const ProductsTable = () => {
                         </IconButton>
                       </Tooltip>
                     </TableCell>
-
-                    {/* Toggle Active */}
                     <TableCell>
                       <Switch
                         checked={product.isActive}
                         onChange={() => handleToggleActive(product)}
                       />
                     </TableCell>
-
-                    {/* Actions */}
                     <TableCell>
                       <Tooltip title="Edit">
                         <IconButton
@@ -373,7 +461,12 @@ const ProductsTable = () => {
         <DialogContent>
           {modalContent.map((doc, index) => (
             <Typography key={index}>
-              <a href={doc} target="_blank" rel="noopener noreferrer">
+              <a
+                href={doc}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: "#1976d2" }}
+              >
                 Document {index + 1}
               </a>
             </Typography>

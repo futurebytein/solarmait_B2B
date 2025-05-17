@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import {
   Box,
@@ -9,8 +10,11 @@ import {
   Fade,
 } from "@mui/material";
 import Image from "next/image";
+import { useRouter } from "next/navigation"; // Import the router
 
 const HeroSection = () => {
+  const router = useRouter(); // Initialize router
+
   return (
     <Box
       sx={{
@@ -146,6 +150,7 @@ const HeroSection = () => {
               {/* Sign Up CTA */}
               <Button
                 variant="contained"
+                onClick={() => router.push("/register")} // Use router.push
                 size="large"
                 sx={{
                   textTransform: "none",

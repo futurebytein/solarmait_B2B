@@ -92,7 +92,7 @@ const TestimonialSlider: React.FC = () => {
               <button
                 aria-label="Previous slide"
                 id="keen-slider-previous-desktop"
-                className="rounded-full border border-rose-600 p-3 text-rose-600 transition hover:bg-rose-600 hover:text-white"
+                className="rounded-full border border-[#33d554] p-3 text-[#33d554] transition hover:bg-[#33d554] hover:text-white"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -113,7 +113,7 @@ const TestimonialSlider: React.FC = () => {
               <button
                 aria-label="Next slide"
                 id="keen-slider-next-desktop"
-                className="rounded-full border border-rose-600 p-3 text-rose-600 transition hover:bg-rose-600 hover:text-white"
+                className="rounded-full border border-[#33d554] p-3 text-[#33d554] transition hover:bg-[#33d554] hover:text-white"
               >
                 <svg
                   className="size-5 rtl:rotate-180"
@@ -165,7 +165,7 @@ const TestimonialSlider: React.FC = () => {
           <button
             aria-label="Previous slide"
             id="keen-slider-previous"
-            className="rounded-full border border-rose-600 p-4 text-rose-600 transition hover:bg-rose-600 hover:text-white"
+            className="rounded-full border border-[#33d554] p-3 text-[#33d554] transition hover:bg-[#33d554] hover:text-white"
           >
             <svg
               className="size-5 -rotate-180 transform"
@@ -186,7 +186,7 @@ const TestimonialSlider: React.FC = () => {
           <button
             aria-label="Next slide"
             id="keen-slider-next"
-            className="rounded-full border border-rose-600 p-4 text-rose-600 transition hover:bg-rose-600 hover:text-white"
+            className="rounded-full border border-[#33d554] p-3 text-[#33d554] transition hover:bg-[#33d554] hover:text-white"
           >
             <svg
               className="size-5"

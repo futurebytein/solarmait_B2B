@@ -15,6 +15,17 @@ interface Product {
   technical_docs?: string[];
 }
 
+// Optional interface for additional PDF documents groups (used for solarkit)
+interface PDFDocsGroup {
+  label: string;
+  docs: string[];
+}
+
+interface DescriptionComponentProps {
+  product: Product | null;
+  pdfDocsGroups?: PDFDocsGroup[];
+}
+
 // PdfViewer Component with type-safe props
 const PdfViewer: React.FC<{ file: string }> = ({ file }) => {
   return (
@@ -40,18 +51,22 @@ const PdfViewer: React.FC<{ file: string }> = ({ file }) => {
 };
 
 // Main DescriptionComponent
-const DescriptionComponent: React.FC<{ product: Product | null }> = ({
+const DescriptionComponent: React.FC<DescriptionComponentProps> = ({
   product,
+  pdfDocsGroups,
 }) => {
+  // Main tab: 0 = Product Details, 1 = Technical Documents
   const [tabValue, setTabValue] = useState<number>(0);
-  const [docTab, setDocTab] = useState<number>(0); // For technical document tabs
+  // For technical documents: if using additional groups, track the selected group tab.
+  // Otherwise, for single group technical_docs, track the selected doc.
+  const [docTab, setDocTab] = useState<number>(0);
 
   // Handle main tabs (Product Details, Technical Documents)
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
 
-  // Handle technical document tabs
+  // Handle technical document tabs (works for both single group and additional groups)
   const handleDocTabChange = (
     event: React.SyntheticEvent,
     newValue: number
@@ -59,7 +74,7 @@ const DescriptionComponent: React.FC<{ product: Product | null }> = ({
     setDocTab(newValue);
   };
 
-  // ✅ Fix: Return a message if product is null
+  // Return a message if product is null
   if (!product) {
     return (
       <Box sx={{ p: 3, textAlign: "center" }}>
@@ -136,9 +151,38 @@ const DescriptionComponent: React.FC<{ product: Product | null }> = ({
             Technical Documents
           </Typography>
 
-          {product.technical_docs?.length ? (
+          {/* If optional pdfDocsGroups is provided, use that */}
+          {pdfDocsGroups && pdfDocsGroups.length > 0 ? (
             <>
-              {/* Tabs for Multiple Documents */}
+              <Tabs
+                value={docTab}
+                onChange={handleDocTabChange}
+                indicatorColor="secondary"
+                textColor="secondary"
+                variant="scrollable"
+                scrollButtons="auto"
+                sx={{ mt: 2 }}
+              >
+                {pdfDocsGroups.map((group, index) => (
+                  <Tab
+                    key={index}
+                    label={group.label}
+                    sx={{ fontWeight: "bold" }}
+                  />
+                ))}
+              </Tabs>
+              {/* Render all PDF viewers in the selected group */}
+              <Box sx={{ mt: 2 }}>
+                {pdfDocsGroups[docTab].docs.map((doc, index) => (
+                  <Box key={index} sx={{ mb: 2 }}>
+                    <PdfViewer file={doc} />
+                  </Box>
+                ))}
+              </Box>
+            </>
+          ) : product.technical_docs && product.technical_docs.length ? (
+            <>
+              {/* Fallback: Tabs for multiple documents in product.technical_docs */}
               <Tabs
                 value={docTab}
                 onChange={handleDocTabChange}
@@ -156,7 +200,6 @@ const DescriptionComponent: React.FC<{ product: Product | null }> = ({
                   />
                 ))}
               </Tabs>
-
               {/* PDF Viewer for Selected Document */}
               <PdfViewer file={product.technical_docs[docTab]} />
             </>

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import apiHelper from "../../helpers/apiHelper";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Register(): JSX.Element {
   // Renamed / required fields
@@ -25,6 +26,14 @@ export default function Register(): JSX.Element {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const router = useRouter();
+  const { user } = useAuth();
+
+  // Redirect if user is already logged in
+  useEffect(() => {
+    if (user) {
+      router.push("/");
+    }
+  }, [user, router]);
 
   // Fetch list of states from the internal API
   useEffect(() => {

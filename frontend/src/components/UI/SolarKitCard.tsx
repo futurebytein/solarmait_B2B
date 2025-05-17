@@ -41,7 +41,7 @@ const SolarKitCard: React.FC<SolarKitCardProps> = ({ kit }) => {
       <Link href={`/solar-kits/${kit._id}`} passHref>
         <CardMedia
           component="img"
-          image="/placeholder-solar-kit.png" // or a real image if available
+          image="/kit-image.png" // or a real image if available
           alt={kit.name}
           sx={{
             height: 180,
